@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"time"
 	"net/http"
+	"os"
+	"time"
+
+	"github.com/joho/godotenv"
 )
 
 type Weather struct {
@@ -34,7 +37,10 @@ type Weather struct {
 }
 
 func main() {
-	response, err := http.Get("http://api.weatherapi.com/v1/current.json?key=59db86bbbd0d4f27b1e150138262307&q=London")
+	err := godotenv.Load()
+	apiKey := os.Getenv("API_KEY")
+
+	response, err := http.Get("http://api.weatherapi.com/v1/current.json?key=" + apiKey + "&q=London")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
