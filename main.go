@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 )
 
@@ -24,7 +25,7 @@ type Weather struct {
 	} `json:"current"`
 	Forecast struct {
 		Forecastday []struct {
-			Hour struct {
+			Hour []struct {
 				TimeEpoch int64   `json:"time_epoch"`
 				TempC     float64 `json:"temp_c"`
 				Condition struct {
@@ -39,8 +40,13 @@ type Weather struct {
 func main() {
 	err := godotenv.Load()
 	apiKey := os.Getenv("API_KEY")
+	api_location := "London"
 
-	response, err := http.Get("http://api.weatherapi.com/v1/current.json?key=" + apiKey + "&q=London")
+	if len(os.Args) > 1 {
+		api_location = os.Args[1]
+	}
+
+	response, err := http.Get("http://api.weatherapi.com/v1/forecast.json?key=" + apiKey + "&q=" + api_location + "&days=1&aqi=no&alerts=no")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -74,11 +80,17 @@ func main() {
 	for _, hour := range hours {
 		date := time.Unix(hour.TimeEpoch, 0)
 
-		fmt.Printf("%s: %.0fC, %s (%.0f%%)\n",
+		message := fmt.Sprintf("%s: %.0fC, %s (%.0f%%)\n",
 			date.Format("15:04"),
 			hour.TempC,
 			hour.Condition.Text,
 			hour.ChanceOfRain,
 		)
+
+		if hour.ChanceOfRain < 22 {
+			fmt.Print(message)
+		} else {
+			color.Red(message)
+		}
 	}
 }

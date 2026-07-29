@@ -1,2 +1,2 @@
-response.json
+*.json
 .env
